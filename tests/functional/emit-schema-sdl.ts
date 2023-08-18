@@ -10,19 +10,21 @@ import {
   Query,
   Resolver,
   buildSchema,
-  buildSchemaSync,
+  //  buildSchemaSync,
   defaultPrintSchemaOptions,
-  emitSchemaDefinitionFile,
-  emitSchemaDefinitionFileSync,
 } from "type-graphql";
 import * as filesystem from "@/helpers/filesystem";
+import {
+  emitSchemaDefinitionFile,
+  emitSchemaDefinitionFileSync,
+} from "@/utils/emitSchemaDefinitionFile";
 import { expectToThrow } from "../helpers/expectToThrow";
 
 const TEST_DIR = path.resolve(process.cwd(), "tests", "test-output-dir");
 
 describe("Emitting schema definition file", () => {
   let schema: GraphQLSchema;
-  let MyResolverClass: any;
+  // let MyResolverClass: any;
 
   beforeAll(async () => {
     @ObjectType()
@@ -42,7 +44,7 @@ describe("Emitting schema definition file", () => {
       }
     }
 
-    MyResolverClass = MyResolver;
+    // MyResolverClass = MyResolver;
 
     schema = await buildSchema({
       resolvers: [MyResolver],
@@ -154,105 +156,108 @@ describe("Emitting schema definition file", () => {
     });
   });
 
-  describe("buildSchema", () => {
-    it("should generate schema SDL file on selected file path", async () => {
-      const targetPath = path.join(TEST_DIR, "schemas", "test3", "schema.graphql");
-      await buildSchema({
-        resolvers: [MyResolverClass],
-        emitSchemaFile: targetPath,
-      });
-      expect(fs.existsSync(targetPath)).toEqual(true);
-      checkSchemaSDL(fs.readFileSync(targetPath).toString());
-    });
+  // these tests are testing the build schema integration with emitSchemaDefinitionFile
+  // however that functionality is replaced by logSchemaDefinitionFile in this build.
 
-    it("should generate schema SDL file in current working dir", async () => {
-      jest.spyOn(process, "cwd").mockImplementation(() => TEST_DIR);
-      const targetPath = path.join(process.cwd(), "schema.graphql");
-      await buildSchema({
-        resolvers: [MyResolverClass],
-        emitSchemaFile: true,
-      });
-      expect(fs.existsSync(targetPath)).toEqual(true);
-      checkSchemaSDL(fs.readFileSync(targetPath).toString());
-    });
+  // describe("buildSchema", () => {
+  //   it("should generate schema SDL file on selected file path", async () => {
+  //     const targetPath = path.join(TEST_DIR, "schemas", "test3", "schema.graphql");
+  //     await buildSchema({
+  //       resolvers: [MyResolverClass],
+  //       emitSchemaFile: targetPath,
+  //     });
+  //     expect(fs.existsSync(targetPath)).toEqual(true);
+  //     checkSchemaSDL(fs.readFileSync(targetPath).toString());
+  //   });
 
-    it("should read EmitSchemaFileOptions and apply them in emit", async () => {
-      const targetPath = path.join(TEST_DIR, "schemas", "test4", "schema.graphql");
-      await buildSchema({
-        resolvers: [MyResolverClass],
-        emitSchemaFile: {
-          path: targetPath,
-          sortedSchema: false,
-        },
-      });
-      expect(fs.existsSync(targetPath)).toEqual(true);
-      checkSchemaSDL(fs.readFileSync(targetPath).toString(), {
-        sortedSchema: false,
-      });
-    });
+  //   it("should generate schema SDL file in current working dir", async () => {
+  //     jest.spyOn(process, "cwd").mockImplementation(() => TEST_DIR);
+  //     const targetPath = path.join(process.cwd(), "schema.graphql");
+  //     await buildSchema({
+  //       resolvers: [MyResolverClass],
+  //       emitSchemaFile: true,
+  //     });
+  //     expect(fs.existsSync(targetPath)).toEqual(true);
+  //     checkSchemaSDL(fs.readFileSync(targetPath).toString());
+  //   });
 
-    it("should read EmitSchemaFileOptions and set default path and sorting schema", async () => {
-      jest.spyOn(process, "cwd").mockImplementation(() => TEST_DIR);
-      const targetPath = path.join(process.cwd(), "schema.graphql");
-      await buildSchema({
-        resolvers: [MyResolverClass],
-        emitSchemaFile: {},
-      });
-      expect(fs.existsSync(targetPath)).toEqual(true);
-      checkSchemaSDL(fs.readFileSync(targetPath).toString(), {
-        ...defaultPrintSchemaOptions,
-      });
-    });
-  });
+  //   it("should read EmitSchemaFileOptions and apply them in emit", async () => {
+  //     const targetPath = path.join(TEST_DIR, "schemas", "test4", "schema.graphql");
+  //     await buildSchema({
+  //       resolvers: [MyResolverClass],
+  //       emitSchemaFile: {
+  //         path: targetPath,
+  //         sortedSchema: false,
+  //       },
+  //     });
+  //     expect(fs.existsSync(targetPath)).toEqual(true);
+  //     checkSchemaSDL(fs.readFileSync(targetPath).toString(), {
+  //       sortedSchema: false,
+  //     });
+  //   });
 
-  describe("buildSchemaSync", () => {
-    it("should synchronously generate schema SDL file on selected file path", async () => {
-      const targetPath = path.join(TEST_DIR, "schemas", "test5", "schema.graphql");
-      buildSchemaSync({
-        resolvers: [MyResolverClass],
-        emitSchemaFile: targetPath,
-      });
-      expect(fs.existsSync(targetPath)).toEqual(true);
-      checkSchemaSDL(fs.readFileSync(targetPath).toString());
-    });
+  //   it("should read EmitSchemaFileOptions and set default path and sorting schema", async () => {
+  //     jest.spyOn(process, "cwd").mockImplementation(() => TEST_DIR);
+  //     const targetPath = path.join(process.cwd(), "schema.graphql");
+  //     await buildSchema({
+  //       resolvers: [MyResolverClass],
+  //       emitSchemaFile: {},
+  //     });
+  //     expect(fs.existsSync(targetPath)).toEqual(true);
+  //     checkSchemaSDL(fs.readFileSync(targetPath).toString(), {
+  //       ...defaultPrintSchemaOptions,
+  //     });
+  //   });
+  // });
 
-    it("should generate schema SDL file in current working dir", async () => {
-      jest.spyOn(process, "cwd").mockImplementation(() => TEST_DIR);
-      const targetPath = path.join(process.cwd(), "schema.graphql");
-      buildSchemaSync({
-        resolvers: [MyResolverClass],
-        emitSchemaFile: true,
-      });
-      expect(fs.existsSync(targetPath)).toEqual(true);
-      checkSchemaSDL(fs.readFileSync(targetPath).toString());
-    });
+  // describe("buildSchemaSync", () => {
+  //   it("should synchronously generate schema SDL file on selected file path", async () => {
+  //     const targetPath = path.join(TEST_DIR, "schemas", "test5", "schema.graphql");
+  //     buildSchemaSync({
+  //       resolvers: [MyResolverClass],
+  //       emitSchemaFile: targetPath,
+  //     });
+  //     expect(fs.existsSync(targetPath)).toEqual(true);
+  //     checkSchemaSDL(fs.readFileSync(targetPath).toString());
+  //   });
 
-    it("should read EmitSchemaFileOptions and apply them in emit", async () => {
-      const targetPath = path.join(TEST_DIR, "schemas", "test6", "schema.graphql");
-      buildSchemaSync({
-        resolvers: [MyResolverClass],
-        emitSchemaFile: {
-          path: targetPath,
-          sortedSchema: false,
-        },
-      });
-      expect(fs.existsSync(targetPath)).toEqual(true);
-      checkSchemaSDL(fs.readFileSync(targetPath).toString(), {
-        sortedSchema: false,
-      });
-    });
+  //   it("should generate schema SDL file in current working dir", async () => {
+  //     jest.spyOn(process, "cwd").mockImplementation(() => TEST_DIR);
+  //     const targetPath = path.join(process.cwd(), "schema.graphql");
+  //     buildSchemaSync({
+  //       resolvers: [MyResolverClass],
+  //       emitSchemaFile: true,
+  //     });
+  //     expect(fs.existsSync(targetPath)).toEqual(true);
+  //     checkSchemaSDL(fs.readFileSync(targetPath).toString());
+  //   });
 
-    it("should read EmitSchemaFileOptions and set default path and sorting schema", async () => {
-      jest.spyOn(process, "cwd").mockImplementation(() => TEST_DIR);
-      const targetPath = path.join(process.cwd(), "schema.graphql");
-      buildSchemaSync({
-        resolvers: [MyResolverClass],
-        emitSchemaFile: {},
-      });
-      expect(fs.existsSync(targetPath)).toEqual(true);
-      checkSchemaSDL(fs.readFileSync(targetPath).toString(), {
-        ...defaultPrintSchemaOptions,
-      });
-    });
-  });
+  //   it("should read EmitSchemaFileOptions and apply them in emit", async () => {
+  //     const targetPath = path.join(TEST_DIR, "schemas", "test6", "schema.graphql");
+  //     buildSchemaSync({
+  //       resolvers: [MyResolverClass],
+  //       emitSchemaFile: {
+  //         path: targetPath,
+  //         sortedSchema: false,
+  //       },
+  //     });
+  //     expect(fs.existsSync(targetPath)).toEqual(true);
+  //     checkSchemaSDL(fs.readFileSync(targetPath).toString(), {
+  //       sortedSchema: false,
+  //     });
+  //   });
+
+  //   it("should read EmitSchemaFileOptions and set default path and sorting schema", async () => {
+  //     jest.spyOn(process, "cwd").mockImplementation(() => TEST_DIR);
+  //     const targetPath = path.join(process.cwd(), "schema.graphql");
+  //     buildSchemaSync({
+  //       resolvers: [MyResolverClass],
+  //       emitSchemaFile: {},
+  //     });
+  //     expect(fs.existsSync(targetPath)).toEqual(true);
+  //     checkSchemaSDL(fs.readFileSync(targetPath).toString(), {
+  //       ...defaultPrintSchemaOptions,
+  //     });
+  //   });
+  // });
 });

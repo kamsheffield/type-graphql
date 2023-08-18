@@ -44,7 +44,9 @@
   "module": "./build/esm/index.js",
   "types": "./build/typings/index.d.ts",
   "files": [
-    "./build"
+    "./build",
+    "./patches",
+    "CHANGES.md"
   ],
   "scripts": {
     "prebuild": "npm run clean:build && npm run check:version",
