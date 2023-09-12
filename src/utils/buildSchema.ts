@@ -1,4 +1,4 @@
-import path from "node:path";
+// import path from "node:path";
 import { type GraphQLSchema } from "graphql";
 import { SchemaGenerator, type SchemaGeneratorOptions } from "@/schema/schema-generator";
 import { type NonEmptyArray } from "@/typings";
@@ -13,7 +13,8 @@ function getEmitSchemaDefinitionFileOptions(buildSchemaOptions: BuildSchemaOptio
   schemaFileName: string;
   printSchemaOptions: PrintSchemaOptions;
 } {
-  const defaultSchemaFilePath = path.resolve(process.cwd(), "schema.graphql");
+  // const defaultSchemaFilePath = path.resolve(process.cwd(), "schema.graphql");
+  const defaultSchemaFilePath = "./schema.graphql";
 
   return {
     schemaFileName:
