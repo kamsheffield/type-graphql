@@ -75,6 +75,10 @@ export function getParams(
       }
     });
 
+  // if the context has a request object pass that in as the last argument
+  if (resolverData.context?.request) {
+    paramValues.push(resolverData.context.request);
+  }
   if (paramValues.some(isPromiseLike)) {
     return Promise.all(paramValues);
   }
