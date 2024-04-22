@@ -125,8 +125,8 @@ export function createAdvancedFieldResolver(
 export function createBasicFieldResolver(
   fieldMetadata: FieldMetadata,
 ): GraphQLFieldResolver<any, any, any> {
-  const { authChecker, authMode, globalMiddlewares, container } = BuildContext;
-  const middlewares = globalMiddlewares.concat(fieldMetadata.middlewares!);
+  const { authChecker, authMode, container } = BuildContext;
+  const middlewares = [...fieldMetadata.middlewares!];
   applyAuthChecker(middlewares, authChecker, container, authMode, fieldMetadata.roles);
 
   return (root, args, context, info) => {

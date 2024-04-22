@@ -81,7 +81,7 @@ describe("Simple resolvers", () => {
 
     await execute({ schema, document });
 
-    expect(middlewareLogs).toHaveLength(2);
+    expect(middlewareLogs).toHaveLength(1);
   });
 
   it("shouldn't execute middlewares for simple field resolvers", async () => {
@@ -123,6 +123,6 @@ describe("Simple resolvers", () => {
 
     await execute({ schema, document });
 
-    expect(middlewareLogs).toHaveLength(2);
+    expect(middlewareLogs).toHaveLength(1);
   });
 });
