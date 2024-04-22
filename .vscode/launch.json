@@ -5,13 +5,18 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run example project",
+      "name": "Run Current Test File",
       "type": "node",
       "request": "launch",
-      "cwd": "${workspaceFolder}/examples/${input:exampleProjectName}",
-      "args": ["./index.ts"],
-      "runtimeArgs": ["--nolazy", "-r", "ts-node/register/transpile-only"],
-      "skipFiles": ["<node_internals>/**"]
+      "runtimeArgs": [
+        "--inspect-brk",
+        "${workspaceRoot}/node_modules/.bin/jest",
+        "--runInBand",
+        "--",
+        "${file}"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
     }
   ],
   "inputs": [
