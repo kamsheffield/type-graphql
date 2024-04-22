@@ -1,3 +1,4 @@
+import { Repeater, filter, pipe } from "@graphql-yoga/subscription";
 import {
   type GraphQLDirective,
   GraphQLEnumType,
@@ -18,13 +19,13 @@ import {
   getIntrospectionQuery,
   graphqlSync,
 } from "graphql";
-import { type ResolverFn, withFilter } from "graphql-subscriptions";
 import { type TypeOptions, type TypeValue } from "@/decorators/types";
 import {
   CannotDetermineGraphQLTypeError,
   ConflictingDefaultValuesError,
   GeneratingSchemaError,
   InterfaceResolveTypeError,
+  MissingPubSubError,
   MissingSubscriptionTopicsError,
   UnionResolveTypeError,
 } from "@/errors";
@@ -45,7 +46,12 @@ import {
   createHandlerResolver,
   wrapResolverWithAuthChecker,
 } from "@/resolvers/create";
-import { type ResolverFilterData, type ResolverTopicData, type TypeResolver } from "@/typings";
+import {
+  type MaybePromise,
+  type SubscribeResolverData,
+  type SubscriptionHandlerData,
+  type TypeResolver,
+} from "@/typings";
 import { ensureInstalledCorrectGraphQLPackage } from "@/utils/graphql-version";
 import { BuildContext, type BuildContextOptions } from "./build-context";
 import {
@@ -324,8 +330,8 @@ export abstract class SchemaGenerator {
                   field.simple !== undefined
                     ? field.simple === true
                     : objectType.simpleResolvers !== undefined
-                    ? objectType.simpleResolvers === true
-                    : false;
+                      ? objectType.simpleResolvers === true
+                      : false;
                 // eslint-disable-next-line no-param-reassign
                 fieldsMap[field.schemaName] = {
                   type,
@@ -334,8 +340,8 @@ export abstract class SchemaGenerator {
                   resolve: fieldResolverMetadata
                     ? createAdvancedFieldResolver(fieldResolverMetadata)
                     : isSimpleResolver
-                    ? undefined
-                    : createBasicFieldResolver(field),
+                      ? undefined
+                      : createBasicFieldResolver(field),
                   description: field.description,
                   deprecationReason: field.deprecationReason,
                   astNode: getFieldDefinitionNode(field.name, type, field.directives),
@@ -582,23 +588,22 @@ export abstract class SchemaGenerator {
   }
 
   private static buildOtherTypes(orphanedTypes: Function[]): GraphQLNamedType[] {
-    const autoRegisteredObjectTypesInfo = this.objectTypesInfo.filter(
-      typeInfo =>
-        typeInfo.metadata.interfaceClasses?.some(interfaceClass => {
-          const implementedInterfaceInfo = this.interfaceTypesInfo.find(
-            it => it.target === interfaceClass,
-          );
-          if (!implementedInterfaceInfo) {
-            return false;
-          }
-          if (implementedInterfaceInfo.metadata.autoRegisteringDisabled) {
-            return false;
-          }
-          if (!this.usedInterfaceTypes.has(interfaceClass)) {
-            return false;
-          }
-          return true;
-        }),
+    const autoRegisteredObjectTypesInfo = this.objectTypesInfo.filter(typeInfo =>
+      typeInfo.metadata.interfaceClasses?.some(interfaceClass => {
+        const implementedInterfaceInfo = this.interfaceTypesInfo.find(
+          it => it.target === interfaceClass,
+        );
+        if (!implementedInterfaceInfo) {
+          return false;
+        }
+        if (implementedInterfaceInfo.metadata.autoRegisteringDisabled) {
+          return false;
+        }
+        if (!this.usedInterfaceTypes.has(interfaceClass)) {
+          return false;
+        }
+        return true;
+      }),
     );
     return [
       ...this.filterTypesInfoByOrphanedTypesAndExtractType(this.objectTypesInfo, orphanedTypes),
@@ -635,48 +640,82 @@ export abstract class SchemaGenerator {
     }, {});
   }
 
-  private static generateSubscriptionsFields<T = any, U = any>(
+  private static generateSubscriptionsFields<
+    TSource extends object = any,
+    TContext extends object = any,
+  >(
     subscriptionsHandlers: SubscriptionResolverMetadata[],
-  ): GraphQLFieldConfigMap<T, U> {
+  ): GraphQLFieldConfigMap<TSource, TContext> {
+    if (!subscriptionsHandlers.length) {
+      return {};
+    }
     const { pubSub, container } = BuildContext;
+    if (!pubSub) {
+      throw new MissingPubSubError();
+    }
     const basicFields = this.generateHandlerFields(subscriptionsHandlers);
-    return subscriptionsHandlers.reduce<GraphQLFieldConfigMap<T, U>>((fields, handler) => {
-      let subscribeFn: GraphQLFieldResolver<T, U>;
-      if (handler.subscribe) {
-        subscribeFn = handler.subscribe;
-      } else {
-        let pubSubIterator: ResolverFn;
-        if (typeof handler.topics === "function") {
-          const getTopics = handler.topics;
-          pubSubIterator = (payload, args, context, info) => {
-            const resolverTopicData: ResolverTopicData = { payload, args, context, info };
-            const topics = getTopics(resolverTopicData);
-            if (Array.isArray(topics) && topics.length === 0) {
-              throw new MissingSubscriptionTopicsError(handler.target, handler.methodName);
-            }
-            return pubSub.asyncIterator(topics);
+    return subscriptionsHandlers.reduce<GraphQLFieldConfigMap<TSource, TContext>>(
+      (fields, handler) => {
+        let subscribeFn: GraphQLFieldResolver<
+          TSource,
+          TContext,
+          any,
+          MaybePromise<AsyncIterable<unknown>>
+        >;
+        if (handler.subscribe) {
+          subscribeFn = (source, args, context, info) => {
+            const subscribeResolverData: SubscribeResolverData = { source, args, context, info };
+            return handler.subscribe!(subscribeResolverData);
           };
         } else {
-          const topics = handler.topics!;
-          pubSubIterator = () => pubSub.asyncIterator(topics);
+          subscribeFn = (source, args, context, info) => {
+            const subscribeResolverData: SubscribeResolverData = { source, args, context, info };
+
+            let topics: string | string[];
+            if (typeof handler.topics === "function") {
+              const getTopics = handler.topics;
+              topics = getTopics(subscribeResolverData);
+            } else {
+              topics = handler.topics!;
+            }
+            const topicId = handler.topicId?.(subscribeResolverData);
+
+            let pubSubIterable: AsyncIterable<any>;
+            if (!Array.isArray(topics)) {
+              pubSubIterable = pubSub.subscribe(topics, topicId);
+            } else {
+              if (topics.length === 0) {
+                throw new MissingSubscriptionTopicsError(handler.target, handler.methodName);
+              }
+              pubSubIterable = Repeater.merge([
+                ...topics.map(topic => pubSub.subscribe(topic, topicId)),
+              ]);
+            }
+
+            if (!handler.filter) {
+              return pubSubIterable;
+            }
+
+            return pipe(
+              pubSubIterable,
+              filter(payload => {
+                const handlerData: SubscriptionHandlerData = { payload, args, context, info };
+                return handler.filter!(handlerData);
+              }),
+            );
+          };
         }
 
-        subscribeFn = handler.filter
-          ? withFilter(pubSubIterator, (payload, args, context, info) => {
-              const resolverFilterData: ResolverFilterData = { payload, args, context, info };
-              return handler.filter!(resolverFilterData);
-            })
-          : pubSubIterator;
-      }
-
-      // eslint-disable-next-line no-param-reassign
-      fields[handler.schemaName].subscribe = wrapResolverWithAuthChecker(
-        subscribeFn,
-        container,
-        handler.roles,
-      );
-      return fields;
-    }, basicFields);
+        // eslint-disable-next-line no-param-reassign
+        fields[handler.schemaName].subscribe = wrapResolverWithAuthChecker(
+          subscribeFn,
+          container,
+          handler.roles,
+        );
+        return fields;
+      },
+      basicFields,
+    );
   }
 
   private static generateHandlerArgs(
@@ -686,19 +725,29 @@ export abstract class SchemaGenerator {
   ): GraphQLFieldConfigArgumentMap {
     return params!.reduce<GraphQLFieldConfigArgumentMap>((args, param) => {
       if (param.kind === "arg") {
+        const type = this.getGraphQLInputType(
+          target,
+          propertyName,
+          param.getType(),
+          param.typeOptions,
+          param.index,
+          param.name,
+        );
+        const argDirectives = getMetadataStorage()
+          .argumentDirectives.filter(
+            it =>
+              it.target === target &&
+              it.fieldName === propertyName &&
+              it.parameterIndex === param.index,
+          )
+          .map(it => it.directive);
         // eslint-disable-next-line no-param-reassign
         args[param.name] = {
           description: param.description,
-          type: this.getGraphQLInputType(
-            target,
-            propertyName,
-            param.getType(),
-            param.typeOptions,
-            param.index,
-            param.name,
-          ),
+          type,
           defaultValue: param.typeOptions.defaultValue,
           deprecationReason: param.deprecationReason,
+          astNode: getInputValueDefinitionNode(param.name, type, argDirectives),
         };
       } else if (param.kind === "args") {
         const argumentType = getMetadataStorage().argumentTypes.find(
@@ -710,18 +759,23 @@ export abstract class SchemaGenerator {
               `is not a class decorated with '@ArgsType' decorator!`,
           );
         }
-        let superClass = Object.getPrototypeOf(argumentType.target);
-        while (superClass.prototype !== undefined) {
-          const superArgumentType = getMetadataStorage().argumentTypes.find(
-            // eslint-disable-next-line @typescript-eslint/no-loop-func
-            it => it.target === superClass,
-          );
-          if (superArgumentType) {
-            this.mapArgFields(superArgumentType, args);
-          }
-          superClass = Object.getPrototypeOf(superClass);
+
+        const inheritanceChainClasses: Function[] = [argumentType.target];
+        for (
+          let superClass = argumentType.target;
+          superClass.prototype !== undefined;
+          superClass = Object.getPrototypeOf(superClass)
+        ) {
+          inheritanceChainClasses.push(superClass);
         }
-        this.mapArgFields(argumentType, args);
+        for (const argsTypeClass of inheritanceChainClasses.reverse()) {
+          const inheritedArgumentType = getMetadataStorage().argumentTypes.find(
+            it => it.target === argsTypeClass,
+          );
+          if (inheritedArgumentType) {
+            this.mapArgFields(inheritedArgumentType, args);
+          }
+        }
       }
       return args;
     }, {});
@@ -739,14 +793,17 @@ export abstract class SchemaGenerator {
         field.name,
         argumentType.name,
       );
+      const type = this.getGraphQLInputType(field.target, field.name, field.getType(), {
+        ...field.typeOptions,
+        defaultValue,
+      });
       // eslint-disable-next-line no-param-reassign
       args[field.schemaName] = {
         description: field.description,
-        type: this.getGraphQLInputType(field.target, field.name, field.getType(), {
-          ...field.typeOptions,
-          defaultValue,
-        }),
+        type,
         defaultValue,
+        astNode: getInputValueDefinitionNode(field.name, type, field.directives),
+        extensions: field.extensions,
         deprecationReason: field.deprecationReason,
       };
     });

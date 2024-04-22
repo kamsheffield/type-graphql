@@ -4,6 +4,44 @@
 
 <!-- Here goes all the unreleased changes descriptions -->
 
+## Features
+
+- support other `Reflect` polyfills than `reflect-metadata` by checking only used `Reflect` API (#1102)
+
+## Fixes
+
+- properly override fields of `@ArgsType` classes in deeply nested inheritance chain (#1644)
+
+## v2.0.0-beta.6
+
+### Fixes
+
+- allow overriding field resolver method with different `name` arguments (#1284)
+- allow object type's `name` argument string contain a double underscore (`__`) when using `buildTypeDefsAndResolvers()` (#1309)
+
+### Others
+
+- **Breaking Change**: update `graphql-scalars` peer dependency to `^1.22.4`
+- properly configure esm build pipeline to publish working esm version of the package
+
+## v2.0.0-beta.4
+
+### Features
+
+- **Breaking Change**: expose shim as a package entry point `type-graphql/shim` (and `/node_modules/type-graphql/build/typings/shim.ts`)
+- **Breaking Change**: update `graphql-js` peer dependency to `^16.8.1`
+- **Breaking Change**: use `@graphql-yoga` instead of `graphql-subscriptions` as the subscriptions engine
+- **Breaking Change**: require providing `PubSub` implementation into `buildSchema` option when using `@Subscription`
+- **Breaking Change**: remove `@PubSub` in favor of directly importing created `PubSub` implementation
+- **Breaking Change**: remove `Publisher` and `PubSubEngine` types
+- **Breaking Change**: rename interface `ResolverFilterData` into `SubscriptionHandlerData` and `ResolverTopicData` into `SubscribeResolverData`
+- support defining directives on `@Field` of `@Args`
+- support defining directives on inline `@Arg`
+- allow passing custom validation function as `validateFn` option of `@Arg` and `@Args` decorators
+- add support for dynamic topic id function in `@Subscription` decorator option
+
+## v2.0.0-beta.3
+
 ### Features
 
 - **Breaking Change**: update `graphql-js` peer dependency to `^16.7.1`

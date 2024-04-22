@@ -1,6 +1,6 @@
 import { ReflectMetadataMissingError } from "@/errors";
 import { isThrowing } from "@/helpers/isThrowing";
-import { type Middleware } from "@/typings/Middleware";
+import { type Middleware } from "@/typings/middleware";
 import {
   type BaseResolverMetadata,
   type FieldResolverMetadata,
@@ -48,18 +48,13 @@ export function mapMiddlewareMetadataToArray(
 ): Array<Middleware<any>> {
   return metadata
     .map(m => m.middlewares)
-    .reduce<Array<Middleware<any>>>(
-      (middlewares, resultArray) => resultArray.concat(middlewares),
-      [],
-    );
+    .reduce<
+      Array<Middleware<any>>
+    >((middlewares, resultArray) => resultArray.concat(middlewares), []);
 }
 
 export function ensureReflectMetadataExists() {
-  if (
-    typeof Reflect !== "object" ||
-    typeof Reflect.decorate !== "function" ||
-    typeof Reflect.metadata !== "function"
-  ) {
+  if (typeof Reflect !== "object" || typeof Reflect.getMetadata !== "function") {
     throw new ReflectMetadataMissingError();
   }
 }

@@ -28,6 +28,7 @@
       "options": [
         "apollo-cache",
         "apollo-federation",
+        "apollo-federation-2",
         "authorization",
         "automatic-validation",
         "custom-validation",

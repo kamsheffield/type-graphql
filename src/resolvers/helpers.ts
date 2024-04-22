@@ -1,10 +1,9 @@
-import { type PubSubEngine } from "graphql-subscriptions";
 import { AuthMiddleware } from "@/helpers/auth-middleware";
 import { convertToType } from "@/helpers/types";
 import { type ParamMetadata } from "@/metadata/definitions";
 import { type ValidateSettings } from "@/schema/build-context";
 import { type AuthChecker, type AuthMode, type ResolverData, type ValidatorFn } from "@/typings";
-import { type Middleware, type MiddlewareClass, type MiddlewareFn } from "@/typings/Middleware";
+import { type Middleware, type MiddlewareClass, type MiddlewareFn } from "@/typings/middleware";
 import { type IOCContainer } from "@/utils/container";
 import { isPromiseLike } from "@/utils/isPromiseLike";
 import { convertArgToInstance, convertArgsToInstance } from "./convert-args";
@@ -14,8 +13,7 @@ export function getParams(
   params: ParamMetadata[],
   resolverData: ResolverData<any>,
   globalValidate: ValidateSettings,
-  validateFn: ValidatorFn | undefined,
-  pubSub: PubSubEngine,
+  globalValidateFn: ValidatorFn | undefined,
 ): Promise<any[]> | any[] {
   const paramValues = params
     .sort((a, b) => a.index - b.index)
@@ -28,8 +26,9 @@ export function getParams(
             paramInfo.getType(),
             resolverData,
             globalValidate,
-            paramInfo.validate,
-            validateFn,
+            paramInfo.validateSettings,
+            globalValidateFn,
+            paramInfo.validateFn,
           );
 
         case "arg":
@@ -38,8 +37,9 @@ export function getParams(
             paramInfo.getType(),
             resolverData,
             globalValidate,
-            paramInfo.validate,
-            validateFn,
+            paramInfo.validateSettings,
+            globalValidateFn,
+            paramInfo.validateFn,
           );
 
         case "context":
@@ -61,12 +61,6 @@ export function getParams(
 
         case "info":
           return resolverData.info;
-
-        case "pubSub":
-          if (paramInfo.triggerKey) {
-            return (payload: any) => pubSub.publish(paramInfo.triggerKey!, payload);
-          }
-          return pubSub;
 
         case "custom":
           return paramInfo.resolver(resolverData);

@@ -280,6 +280,22 @@ const CollectiveSection = props => (
             <img src={imgUrl("vps-server.png")} style={{ width: 125 }} />
             <span>VPS Server</span>
           </a>
+          <a href="https://www.nongamstopbets.com/casinos-not-on-gamstop/" target="_blank">
+            <img src={imgUrl("nongamstopbets.png")} style={{ width: 50 }} />
+            <span>NonGamstopBets</span>
+          </a>
+          <a href="https://casinodeps.co.nz/1-dollar-casinos/" target="_blank">
+            <img src={imgUrl("casinodeps.svg")} style={{ width: 80 }} />
+            <span>CasinoDeps</span>
+          </a>
+          <a href="https://uk.nonstopcasino.org/non-gamstop-casinos/" target="_blank">
+            <img src={imgUrl("non-stop-casino.png")} style={{ width: 60 }} />
+            <span>Non Stop Casino</span>
+          </a>
+          <a href="https://nongamstopcasinos.net/gb/" target="_blank">
+            <img src={imgUrl("non-gamstop-casinos.svg")} style={{ width: 90 }} />
+            <span>NonGamstopCasinos</span>
+          </a>
         </div>
         <h3 className="title">Members 💪</h3>
         <a href="https://opencollective.com/typegraphql#contributors">

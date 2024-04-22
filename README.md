@@ -5,12 +5,13 @@
 
 # TypeGraphQL
 
-[![ci](https://github.com/MichalLytek/type-graphql/actions/workflows/ci.yml/badge.svg)](https://github.com/MichalLytek/type-graphql/actions/workflows/ci.yml)
-[![codeql](https://github.com/MichalLytek/type-graphql/actions/workflows/codeql.yml/badge.svg)](https://github.com/carlocorradini/reCluster/actions/workflows/codeql.yml)
-[![npm version](https://badge.fury.io/js/type-graphql.svg)](https://badge.fury.io/js/type-graphql)
+[![release](https://github.com/MichalLytek/type-graphql/actions/workflows/release.yml/badge.svg)](https://github.com/MichalLytek/type-graphql/actions/workflows/release.yml)
+[![website](https://github.com/MichalLytek/type-graphql/actions/workflows/website.yml/badge.svg)](https://github.com/MichalLytek/type-graphql/actions/workflows/website.yml)
+[![codeql](https://github.com/MichalLytek/type-graphql/actions/workflows/codeql.yml/badge.svg)](https://github.com/MichalLytek/type-graphql/actions/workflows/codeql.yml)
+[![discord](https://img.shields.io/discord/1195751245386875040?logo=discord&color=%237289da)](https://discord.gg/cWnBAQcbg2)
 [![codecov](https://codecov.io/gh/MichalLytek/type-graphql/branch/master/graph/badge.svg)](https://codecov.io/gh/MichalLytek/type-graphql)
+[![npm](https://img.shields.io/npm/v/type-graphql?logo=npm&color=%23CC3534)](https://www.npmjs.com/package/type-graphql)
 [![open collective](https://opencollective.com/typegraphql/tiers/badge.svg)](https://opencollective.com/typegraphql)
-[![install size](https://packagephobia.com/badge?p=type-graphql)](https://packagephobia.com/result?p=type-graphql)
 
 Create [GraphQL](https://graphql.org) schema and resolvers with [TypeScript](https://www.typescriptlang.org), using classes and decorators!
 
@@ -180,6 +181,10 @@ It doesn't have a large company that sits behind it - its ongoing development is
 | :------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------: |
 |                               [**Live Graphic Systems**](https://www.ligrsystems.com)                                |                       [**LifeX Aps**](https://www.joinlifex.com/)                        |                            [**instinctools**](https://instinctools.com/manufacturing)                            |                           [**VPS Server**](https://www.vpsserver.com)                           |
 
+| [<img src="./images/nongamstopbets.png" width="50" alt="NonGamstopBets" />](https://www.nongamstopbets.com/casinos-not-on-gamstop/) | [<img src="./images/casinodeps.svg" width="80" alt="CasinoDeps.co.nz" />](https://casinodeps.co.nz/1-dollar-casinos/) | [<img src="./images/non-stop-casino.png" width="60" alt="Non Stop Casino" />](https://uk.nonstopcasino.org/non-gamstop-casinos/) | [<img src="./images/non-gamstop-casinos.svg" width="90" alt="NonGamstopCasinos" />](https://nongamstopcasinos.net/gb/) |
+| :---------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------: |
+|                            [**NonGamstopBets**](https://www.nongamstopbets.com/casinos-not-on-gamstop/)                             |                             [**CasinoDeps**](https://casinodeps.co.nz/1-dollar-casinos/)                              |                             [**Non Stop Casino**](https://uk.nonstopcasino.org/non-gamstop-casinos/)                             |                               [**NonGamstopCasinos**](https://nongamstopcasinos.net/gb/)                               |
+
 <!-- markdownlint-enable MD033 -->
 
 [![become a sponsor](https://opencollective.com/static/images/become_sponsor.svg)](https://opencollective.com/typegraphql)
@@ -191,6 +196,11 @@ It doesn't have a large company that sits behind it - its ongoing development is
 ### GitHub Sponsors
 
 [![GitHub Sponsors](./images/github-sponsors.svg)](https://github.com/sponsors/TypeGraphQL)
+
+## Community
+
+- Visit the [Official Website](https://typegraphql.com)
+- Chat on [Discord](https://discord.gg/cWnBAQcbg2)
 
 ## Want to help?
 

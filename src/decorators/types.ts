@@ -3,9 +3,11 @@ import { type ValidateSettings } from "@/schema/build-context";
 import {
   type ClassType,
   type Complexity,
-  type ResolverFilterData,
-  type ResolverTopicData,
+  type MaybePromise,
+  type SubscribeResolverData,
+  type SubscriptionHandlerData,
   type TypeResolver,
+  type ValidatorFn,
 } from "@/typings";
 
 export type RecursiveArray<TValue> = Array<RecursiveArray<TValue> | TValue>;
@@ -19,12 +21,18 @@ export type ClassTypeResolver = (of?: void) => ClassType | Function;
 export type ReturnTypeFunc = (returns?: void) => ReturnTypeFuncValue;
 
 export type SubscriptionFilterFunc = (
-  resolverFilterData: ResolverFilterData<any, any, any>,
+  handlerData: SubscriptionHandlerData<any, any, any>,
 ) => boolean | Promise<boolean>;
 
-export type SubscriptionTopicFunc = (
-  resolverTopicData: ResolverTopicData<any, any, any>,
+export type SubscriptionTopicsFunc = (
+  resolverData: SubscribeResolverData<any, any, any>,
 ) => string | string[];
+
+export type SubscriptionSubscribeFunc = (
+  resolverData: SubscribeResolverData<any, any, any>,
+) => MaybePromise<AsyncIterable<any>>;
+
+export type SubscriptionTopicIdFunc = (resolverData: SubscribeResolverData<any, any, any>) => any;
 
 export interface DecoratorTypeOptions {
   nullable?: boolean | NullableListOptions;
@@ -45,6 +53,7 @@ export interface DeprecationOptions {
 }
 export interface ValidateOptions {
   validate?: ValidateSettings;
+  validateFn?: ValidatorFn;
 }
 export interface ComplexityOptions {
   complexity?: Complexity;

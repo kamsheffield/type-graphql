@@ -21,13 +21,13 @@ import {
   type UnionMetadataWithSymbol,
 } from "./definitions";
 import {
+  type DirectiveArgumentMetadata,
   type DirectiveClassMetadata,
   type DirectiveFieldMetadata,
 } from "./definitions/directive-metadata";
 import { type InterfaceClassMetadata } from "./definitions/interface-class-metadata";
 import { type ObjectClassMetadata } from "./definitions/object-class-metadata";
 import {
-  ensureReflectMetadataExists,
   mapMiddlewareMetadataToArray,
   mapSuperFieldResolverHandlers,
   mapSuperResolverHandlers,
@@ -62,6 +62,8 @@ export class MetadataStorage {
 
   fieldDirectives: DirectiveFieldMetadata[] = [];
 
+  argumentDirectives: DirectiveArgumentMetadata[] = [];
+
   classExtensions: ExtensionsClassMetadata[] = [];
 
   fieldExtensions: ExtensionsFieldMetadata[] = [];
@@ -71,10 +73,6 @@ export class MetadataStorage {
   fields: FieldMetadata[] = [];
 
   params: ParamMetadata[] = [];
-
-  constructor() {
-    ensureReflectMetadataExists();
-  }
 
   collectQueryHandlerMetadata(definition: ResolverMetadata) {
     this.queries.push(definition);
@@ -149,6 +147,10 @@ export class MetadataStorage {
     this.fieldDirectives.push(definition);
   }
 
+  collectDirectiveArgumentMetadata(definition: DirectiveArgumentMetadata) {
+    this.argumentDirectives.push(definition);
+  }
+
   collectExtensionsClassMetadata(definition: ExtensionsClassMetadata) {
     this.classExtensions.push(definition);
   }
@@ -160,6 +162,7 @@ export class MetadataStorage {
   build(options: SchemaGeneratorOptions) {
     this.classDirectives.reverse();
     this.fieldDirectives.reverse();
+    this.argumentDirectives.reverse();
     this.classExtensions.reverse();
     this.fieldExtensions.reverse();
 
@@ -192,6 +195,7 @@ export class MetadataStorage {
     this.middlewares = [];
     this.classDirectives = [];
     this.fieldDirectives = [];
+    this.argumentDirectives = [];
     this.classExtensions = [];
     this.fieldExtensions = [];
 
@@ -282,7 +286,9 @@ export class MetadataStorage {
           );
         }
 
-        const typeField = typeMetadata.fields!.find(fieldDef => fieldDef.name === def.methodName)!;
+        const typeField = typeMetadata.fields!.find(
+          fieldDef => fieldDef.schemaName === def.schemaName,
+        )!;
         if (!typeField) {
           const shouldCollectFieldMetadata =
             !options.resolvers ||

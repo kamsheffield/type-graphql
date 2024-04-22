@@ -1,13 +1,14 @@
-import { type ResolverFn } from "graphql-subscriptions";
 import {
   type ClassTypeResolver,
   type SubscriptionFilterFunc,
-  type SubscriptionTopicFunc,
+  type SubscriptionSubscribeFunc,
+  type SubscriptionTopicIdFunc,
+  type SubscriptionTopicsFunc,
   type TypeOptions,
   type TypeValueThunk,
 } from "@/decorators/types";
 import { type Complexity } from "@/typings";
-import { type Middleware } from "@/typings/Middleware";
+import { type Middleware } from "@/typings/middleware";
 import { type DirectiveMetadata } from "./directive-metadata";
 import { type ExtensionsMetadata } from "./extensions-metadata";
 import { type ParamMetadata } from "./param-metadata";
@@ -42,9 +43,10 @@ export type FieldResolverMetadata = {
 } & BaseResolverMetadata;
 
 export type SubscriptionResolverMetadata = {
-  topics: string | string[] | SubscriptionTopicFunc | undefined;
+  topics: string | string[] | SubscriptionTopicsFunc | undefined;
+  topicId: SubscriptionTopicIdFunc | undefined;
   filter: SubscriptionFilterFunc | undefined;
-  subscribe: ResolverFn | undefined;
+  subscribe: SubscriptionSubscribeFunc | undefined;
 } & ResolverMetadata;
 
 export interface ResolverClassMetadata {
