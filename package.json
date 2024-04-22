@@ -75,7 +75,7 @@
     "clean:coverage": "npx shx rm -rf ./coverage",
     "prepublishOnly": "npm run build && npm run gen:readme",
     "pretest": "npm run clean:coverage",
-    "test": "npx jest --verbose --coverage",
+    "test": "npx jest --maxWorkers=1 --verbose --coverage",
     "pretest:ci": "npm run clean:coverage",
     "test:ci": "npx jest --verbose --coverage --ci --forceExit --runInBand",
     "release": "npm version --message \"release: %s\"",
