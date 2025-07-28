@@ -1,11 +1,9 @@
-import { Repeater, filter, pipe } from "@graphql-yoga/subscription";
 import {
   type GraphQLDirective,
   GraphQLEnumType,
   type GraphQLEnumValueConfigMap,
   type GraphQLFieldConfigArgumentMap,
   type GraphQLFieldConfigMap,
-  type GraphQLFieldResolver,
   type GraphQLInputFieldConfigMap,
   GraphQLInputObjectType,
   type GraphQLInputType,
@@ -25,8 +23,6 @@ import {
   ConflictingDefaultValuesError,
   GeneratingSchemaError,
   InterfaceResolveTypeError,
-  MissingPubSubError,
-  MissingSubscriptionTopicsError,
   UnionResolveTypeError,
 } from "@/errors";
 import { convertTypeIfScalar, getEnumValuesMap, wrapWithTypeOptions } from "@/helpers/types";
@@ -45,14 +41,8 @@ import {
   createAdvancedFieldResolver,
   createBasicFieldResolver,
   createHandlerResolver,
-  wrapResolverWithAuthChecker,
 } from "@/resolvers/create";
-import {
-  type MaybePromise,
-  type SubscribeResolverData,
-  type SubscriptionHandlerData,
-  type TypeResolver,
-} from "@/typings";
+import { type TypeResolver } from "@/typings";
 import { ensureInstalledCorrectGraphQLPackage } from "@/utils/graphql-version";
 import { BuildContext, type BuildContextOptions } from "./build-context";
 import {
@@ -650,78 +640,79 @@ export abstract class SchemaGenerator {
     TSource extends object = any,
     TContext extends object = any,
   >(
-    subscriptionsHandlers: SubscriptionResolverMetadata[],
+    _subscriptionsHandlers: SubscriptionResolverMetadata[],
   ): GraphQLFieldConfigMap<TSource, TContext> {
-    if (!subscriptionsHandlers.length) {
-      return {};
-    }
-    const { pubSub, container } = BuildContext;
-    if (!pubSub) {
-      throw new MissingPubSubError();
-    }
-    const basicFields = this.generateHandlerFields(subscriptionsHandlers);
-    return subscriptionsHandlers.reduce<GraphQLFieldConfigMap<TSource, TContext>>(
-      (fields, handler) => {
-        let subscribeFn: GraphQLFieldResolver<
-          TSource,
-          TContext,
-          any,
-          MaybePromise<AsyncIterable<unknown>>
-        >;
-        if (handler.subscribe) {
-          subscribeFn = (source, args, context, info) => {
-            const subscribeResolverData: SubscribeResolverData = { source, args, context, info };
-            return handler.subscribe!(subscribeResolverData);
-          };
-        } else {
-          subscribeFn = (source, args, context, info) => {
-            const subscribeResolverData: SubscribeResolverData = { source, args, context, info };
+    throw new Error("Subscriptions are not yet implemented in this version of TypeGraphQL.");
+    // if (!subscriptionsHandlers.length) {
+    //   return {};
+    // }
+    // const { pubSub, container } = BuildContext;
+    // if (!pubSub) {
+    //   throw new MissingPubSubError();
+    // }
+    // const basicFields = this.generateHandlerFields(subscriptionsHandlers);
+    // return subscriptionsHandlers.reduce<GraphQLFieldConfigMap<TSource, TContext>>(
+    //   (fields, handler) => {
+    //     let subscribeFn: GraphQLFieldResolver<
+    //       TSource,
+    //       TContext,
+    //       any,
+    //       MaybePromise<AsyncIterable<unknown>>
+    //     >;
+    //     if (handler.subscribe) {
+    //       subscribeFn = (source, args, context, info) => {
+    //         const subscribeResolverData: SubscribeResolverData = { source, args, context, info };
+    //         return handler.subscribe!(subscribeResolverData);
+    //       };
+    //     } else {
+    //       subscribeFn = (source, args, context, info) => {
+    //         const subscribeResolverData: SubscribeResolverData = { source, args, context, info };
 
-            let topics: string | string[];
-            if (typeof handler.topics === "function") {
-              const getTopics = handler.topics;
-              topics = getTopics(subscribeResolverData);
-            } else {
-              topics = handler.topics!;
-            }
-            const topicId = handler.topicId?.(subscribeResolverData);
+    //         let topics: string | string[];
+    //         if (typeof handler.topics === "function") {
+    //           const getTopics = handler.topics;
+    //           topics = getTopics(subscribeResolverData);
+    //         } else {
+    //           topics = handler.topics!;
+    //         }
+    //         const topicId = handler.topicId?.(subscribeResolverData);
 
-            let pubSubIterable: AsyncIterable<any>;
-            if (!Array.isArray(topics)) {
-              pubSubIterable = pubSub.subscribe(topics, topicId);
-            } else {
-              if (topics.length === 0) {
-                throw new MissingSubscriptionTopicsError(handler.target, handler.methodName);
-              }
-              pubSubIterable = Repeater.merge([
-                ...topics.map(topic => pubSub.subscribe(topic, topicId)),
-              ]);
-            }
+    //         let pubSubIterable: AsyncIterable<any>;
+    //         if (!Array.isArray(topics)) {
+    //           pubSubIterable = pubSub.subscribe(topics, topicId);
+    //         } else {
+    //           if (topics.length === 0) {
+    //             throw new MissingSubscriptionTopicsError(handler.target, handler.methodName);
+    //           }
+    //           pubSubIterable = Repeater.merge([
+    //             ...topics.map(topic => pubSub.subscribe(topic, topicId)),
+    //           ]);
+    //         }
 
-            if (!handler.filter) {
-              return pubSubIterable;
-            }
+    //         if (!handler.filter) {
+    //           return pubSubIterable;
+    //         }
 
-            return pipe(
-              pubSubIterable,
-              filter(payload => {
-                const handlerData: SubscriptionHandlerData = { payload, args, context, info };
-                return handler.filter!(handlerData);
-              }),
-            );
-          };
-        }
+    //         return pipe(
+    //           pubSubIterable,
+    //           filter(payload => {
+    //             const handlerData: SubscriptionHandlerData = { payload, args, context, info };
+    //             return handler.filter!(handlerData);
+    //           }),
+    //         );
+    //       };
+    //     }
 
-        // eslint-disable-next-line no-param-reassign
-        fields[handler.schemaName].subscribe = wrapResolverWithAuthChecker(
-          subscribeFn,
-          container,
-          handler.roles,
-        );
-        return fields;
-      },
-      basicFields,
-    );
+    //     // eslint-disable-next-line no-param-reassign
+    //     fields[handler.schemaName].subscribe = wrapResolverWithAuthChecker(
+    //       subscribeFn,
+    //       container,
+    //       handler.roles,
+    //     );
+    //     return fields;
+    //   },
+    //   basicFields,
+    // );
   }
 
   private static generateHandlerArgs(

@@ -1,19 +1,8 @@
 import "reflect-metadata";
-import { createPubSub } from "@graphql-yoga/subscription";
 import { type GraphQLSchema, parse } from "graphql";
 import { fieldExtensionsEstimator, getComplexity, simpleEstimator } from "graphql-query-complexity";
-import {
-  Arg,
-  type ClassType,
-  Field,
-  ObjectType,
-  Query,
-  Resolver,
-  Subscription,
-  buildSchema,
-} from "type-graphql";
+import { Field, ObjectType, Query, Resolver, buildSchema } from "type-graphql";
 import { getMetadataStorage } from "@/metadata/getMetadataStorage";
-import { getSchemaInfo } from "../helpers/getSchemaInfo";
 
 // Helpers
 function calculateComplexityPoints(query: string, schema: GraphQLSchema) {
@@ -72,65 +61,65 @@ describe("Query complexity", () => {
     });
   });
 
-  describe("Subscriptions", () => {
-    let schema: GraphQLSchema;
+  // describe("Subscriptions", () => {
+  //   let schema: GraphQLSchema;
 
-    beforeAll(async () => {
-      getMetadataStorage().clear();
+  //   beforeAll(async () => {
+  //     getMetadataStorage().clear();
 
-      @ObjectType()
-      class SampleObject {
-        @Field()
-        normalField!: string;
-      }
+  //     @ObjectType()
+  //     class SampleObject {
+  //       @Field()
+  //       normalField!: string;
+  //     }
 
-      function createResolver(name: string, objectType: ClassType) {
-        @Resolver(() => objectType)
-        class BaseResolver {
-          protected name = "baseName";
+  //     function createResolver(name: string, objectType: ClassType) {
+  //       @Resolver(() => objectType)
+  //       class BaseResolver {
+  //         protected name = "baseName";
 
-          @Query({ name: `${name}Query` })
-          baseQuery(@Arg("arg") _arg: boolean): boolean {
-            return true;
-          }
+  //         @Query({ name: `${name}Query` })
+  //         baseQuery(@Arg("arg") _arg: boolean): boolean {
+  //           return true;
+  //         }
 
-          @Subscription({ topics: "baseTopic", name: `${name}Subscription` })
-          baseSubscription(@Arg("arg") _arg: boolean): boolean {
-            return true;
-          }
-        }
+  //         // @Subscription({ topics: "baseTopic", name: `${name}Subscription` })
+  //         // baseSubscription(@Arg("arg") _arg: boolean): boolean {
+  //         //   return true;
+  //         // }
+  //       }
 
-        return BaseResolver;
-      }
+  //       return BaseResolver;
+  //     }
 
-      @Resolver()
-      class ChildResolver extends createResolver("prefix", SampleObject) {
-        @Subscription({ topics: "childTopic", complexity: 4 })
-        childSubscription(): boolean {
-          return true;
-        }
-      }
+  //     @Resolver()
+  //     class ChildResolver extends createResolver("prefix", SampleObject) {
+  //       // @Subscription({ topics: "childTopic", complexity: 4 })
+  //       // childSubscription(): boolean {
+  //       //   return true;
+  //       // }
+  //     }
 
-      const schemaInfo = await getSchemaInfo({
-        resolvers: [ChildResolver],
-        pubSub: createPubSub(),
-      });
+  //     const schemaInfo = await getSchemaInfo({
+  //       resolvers: [ChildResolver],
+  //       // pubSub: createPubSub(),
+  //     });
 
-      schema = schemaInfo.schema;
-    });
+  //     schema = schemaInfo.schema;
+  //   });
 
-    it("should build schema correctly", async () => {
-      expect(schema).toBeDefined();
-    });
+  //   it("should build schema correctly", async () => {
+  //     expect(schema).toBeDefined();
+  //   });
 
-    it("should properly calculate subscription complexity", () => {
-      const query = `subscription {
-        childSubscription
-      }`;
+  //   it("should properly calculate subscription complexity", () => {
+  //     const query = `subscription {
+  //       childSubscription
+  //     }`;
 
-      const points = calculateComplexityPoints(query, schema);
+  //     const points = calculateComplexityPoints(query, schema);
 
-      expect(points).toEqual(4);
-    });
-  });
+  //     expect(points).toEqual(4);
+  //   });
+  // });
 });

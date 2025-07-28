@@ -108,7 +108,6 @@
     }
   },
   "dependencies": {
-    "@graphql-yoga/subscription": "^5.0.1",
     "@types/node": "*",
     "graphql-query-complexity": "^1.0.0",
     "tslib": "^2.6.3"

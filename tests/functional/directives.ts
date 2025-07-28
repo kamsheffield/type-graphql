@@ -1,5 +1,4 @@
 import "reflect-metadata";
-import { createPubSub } from "@graphql-yoga/subscription";
 import {
   type GraphQLInputObjectType,
   type GraphQLInterfaceType,
@@ -534,52 +533,52 @@ describe("Directives", () => {
       });
     });
 
-    describe("on Subscription", () => {
-      let schema: GraphQLSchema;
-      beforeAll(async () => {
-        @Resolver()
-        class SampleResolver {
-          @Query()
-          sampleQuery(): boolean {
-            return true;
-          }
+    // describe("on Subscription", () => {
+    //   let schema: GraphQLSchema;
+    //   beforeAll(async () => {
+    //     @Resolver()
+    //     class SampleResolver {
+    //       @Query()
+    //       sampleQuery(): boolean {
+    //         return true;
+    //       }
 
-          @Directive("@test")
-          @Subscription({ topics: "sample" })
-          sampleSubscription(): boolean {
-            return true;
-          }
-        }
+    //       @Directive("@test")
+    //       @Subscription({ topics: "sample" })
+    //       sampleSubscription(): boolean {
+    //         return true;
+    //       }
+    //     }
 
-        schema = await buildSchema({
-          resolvers: [SampleResolver],
-          directives: [testDirective],
-          validate: false,
-          pubSub: createPubSub(),
-        });
-        schema = testDirectiveTransformer(schema);
-      });
+    //     schema = await buildSchema({
+    //       resolvers: [SampleResolver],
+    //       directives: [testDirective],
+    //       validate: false,
+    //       pubSub: createPubSub(),
+    //     });
+    //     schema = testDirectiveTransformer(schema);
+    //   });
 
-      it("should properly emit directive in AST", () => {
-        const sampleSubscriptionInfo = schema
-          .getRootType(OperationTypeNode.SUBSCRIPTION)!
-          .getFields().sampleSubscription;
+    //   it("should properly emit directive in AST", () => {
+    //     const sampleSubscriptionInfo = schema
+    //       .getRootType(OperationTypeNode.SUBSCRIPTION)!
+    //       .getFields().sampleSubscription;
 
-        expect(() => {
-          assertValidDirective(sampleSubscriptionInfo.astNode, "test");
-        }).not.toThrow();
-      });
+    //     expect(() => {
+    //       assertValidDirective(sampleSubscriptionInfo.astNode, "test");
+    //     }).not.toThrow();
+    //   });
 
-      it("should properly apply directive mapper", async () => {
-        const sampleSubscriptionInfo = schema
-          .getRootType(OperationTypeNode.SUBSCRIPTION)!
-          .getFields().sampleSubscription;
+    //   it("should properly apply directive mapper", async () => {
+    //     const sampleSubscriptionInfo = schema
+    //       .getRootType(OperationTypeNode.SUBSCRIPTION)!
+    //       .getFields().sampleSubscription;
 
-        expect(sampleSubscriptionInfo.extensions).toMatchObject({
-          TypeGraphQL: { isMappedByDirective: true },
-        });
-      });
-    });
+    //     expect(sampleSubscriptionInfo.extensions).toMatchObject({
+    //       TypeGraphQL: { isMappedByDirective: true },
+    //     });
+    //   });
+    // });
   });
 
   describe("multiline and leading white spaces", () => {

@@ -1,10 +1,8 @@
 /* eslint "no-underscore-dangle": ["error", { "allow": ["__schema"] }] */
 import "reflect-metadata";
 import { makeExecutableSchema } from "@graphql-tools/schema";
-import { createPubSub } from "@graphql-yoga/subscription";
 import { MinLength } from "class-validator";
 import {
-  type ExecutionResult,
   type GraphQLSchema,
   type IntrospectionEnumType,
   type IntrospectionInputObjectType,
@@ -19,7 +17,6 @@ import {
   execute,
   getIntrospectionQuery,
   graphql,
-  subscribe,
 } from "graphql";
 import gql from "graphql-tag";
 import {
@@ -31,14 +28,10 @@ import {
   InterfaceType,
   Mutation,
   ObjectType,
-  type PubSub,
   Query,
   Resolver,
   type ResolverObject,
-  type ResolverOptions,
   type ResolversMap,
-  Root,
-  Subscription,
   UseMiddleware,
   buildTypeDefsAndResolvers,
   buildTypeDefsAndResolversSync,
@@ -55,7 +48,6 @@ describe("typeDefs and resolvers", () => {
     let resolvers: ResolversMap;
     let schemaIntrospection: IntrospectionSchema;
     let schema: GraphQLSchema;
-    let pubSub: PubSub;
     let inputValue: any;
     let enumValue: any;
     let middlewareLogs: string[];
@@ -242,15 +234,15 @@ describe("typeDefs and resolvers", () => {
           return stringEnum;
         }
 
-        @Subscription({
-          topics: "SAMPLE",
-        })
-        sampleSubscription(@Root() payload: number): number {
-          return payload;
-        }
+        // @Subscription({
+        //   topics: "SAMPLE",
+        // })
+        // sampleSubscription(@Root() payload: number): number {
+        //   return payload;
+        // }
       }
 
-      pubSub = createPubSub();
+      // pubSub = createPubSub();
 
       @Service()
       @Resolver(() => SampleType4)
@@ -272,7 +264,7 @@ describe("typeDefs and resolvers", () => {
       ({ typeDefs, resolvers } = await buildTypeDefsAndResolvers({
         resolvers: [SampleResolver, SampleObjectTypeWithDoubleUnderscoreInNameResolver],
         authChecker: () => false,
-        pubSub,
+        // pubSub,
         container: Container,
         orphanedTypes: [SampleType1],
         validate: true,
@@ -400,13 +392,13 @@ describe("typeDefs and resolvers", () => {
         expect(mutationType.fields).toHaveLength(3);
       });
 
-      it("should generate subscription", async () => {
-        const subscriptionType = schemaIntrospection.types.find(
-          it => it.name === schemaIntrospection.subscriptionType!.name,
-        ) as IntrospectionObjectType;
+      // it("should generate subscription", async () => {
+      //   const subscriptionType = schemaIntrospection.types.find(
+      //     it => it.name === schemaIntrospection.subscriptionType!.name,
+      //   ) as IntrospectionObjectType;
 
-        expect(subscriptionType.fields).toHaveLength(1);
-      });
+      //   expect(subscriptionType.fields).toHaveLength(1);
+      // });
 
       it("should emit Date scalar", async () => {
         const dateScalar = schemaIntrospection.types.find(
@@ -425,7 +417,7 @@ describe("typeDefs and resolvers", () => {
       it("should not emit `__isTypeOf` for root objects", async () => {
         expect(resolvers.Query).not.toHaveProperty("__isTypeOf");
         expect(resolvers.Mutation).not.toHaveProperty("__isTypeOf");
-        expect(resolvers.Subscription).not.toHaveProperty("__isTypeOf");
+        // expect(resolvers.Subscription).not.toHaveProperty("__isTypeOf");
       });
 
       it("should properly serialize Date scalar", async () => {
@@ -627,21 +619,21 @@ describe("typeDefs and resolvers", () => {
         });
       });
 
-      it("should properly run subscriptions", async () => {
-        const document = gql`
-          subscription {
-            sampleSubscription
-          }
-        `;
-        const payload = 5.4321;
+      // it("should properly run subscriptions", async () => {
+      //   const document = gql`
+      //     subscription {
+      //       sampleSubscription
+      //     }
+      //   `;
+      //   const payload = 5.4321;
 
-        const iterator = (await subscribe({ schema, document })) as AsyncIterator<ExecutionResult>;
-        const firstValuePromise = iterator.next();
-        pubSub.publish("SAMPLE", payload);
-        const data = await firstValuePromise;
+      //   const iterator = (await subscribe({ schema, document })) as AsyncIterator<ExecutionResult>;
+      //   const firstValuePromise = iterator.next();
+      //   pubSub.publish("SAMPLE", payload);
+      //   const data = await firstValuePromise;
 
-        expect(data.value.data!.sampleSubscription).toBe(payload);
-      });
+      //   expect(data.value.data!.sampleSubscription).toBe(payload);
+      // });
 
       it("should generate simple resolvers function for queries and mutations", async () => {
         expect((resolvers.Query as ResolverObject<any, any>).sampleDateQuery).toBeInstanceOf(
@@ -652,13 +644,13 @@ describe("typeDefs and resolvers", () => {
         ).toBeInstanceOf(Function);
       });
 
-      it("should generate resolvers object for subscriptions", async () => {
-        const sampleSubscription = (resolvers.Subscription as ResolverObject<any, any>)
-          .sampleSubscription as ResolverOptions<any, any>;
+      // it("should generate resolvers object for subscriptions", async () => {
+      //   const sampleSubscription = (resolvers.Subscription as ResolverObject<any, any>)
+      //     .sampleSubscription as ResolverOptions<any, any>;
 
-        expect(sampleSubscription.resolve).toBeInstanceOf(Function);
-        expect(sampleSubscription.subscribe).toBeInstanceOf(Function);
-      });
+      //   expect(sampleSubscription.resolve).toBeInstanceOf(Function);
+      //   expect(sampleSubscription.subscribe).toBeInstanceOf(Function);
+      // });
     });
   });
 

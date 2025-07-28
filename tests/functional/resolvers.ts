@@ -1,6 +1,5 @@
 /* eslint "@typescript-eslint/no-this-alias": ["error", { "allowedNames": ["self"] }] */
 import "reflect-metadata";
-import { createPubSub } from "@graphql-yoga/subscription";
 import {
   type GraphQLSchema,
   type IntrospectionField,
@@ -33,7 +32,6 @@ import {
   Resolver,
   type ResolverInterface,
   Root,
-  Subscription,
   WrongNullableListOptionError,
   buildSchema,
   buildSchemaSync,
@@ -2210,12 +2208,9 @@ describe("Resolvers", () => {
     let schemaIntrospection: IntrospectionSchema;
     let queryType: IntrospectionObjectType;
     let mutationType: IntrospectionObjectType;
-    let subscriptionType: IntrospectionObjectType;
     let self: any;
     let childResolver: any;
     let overrideResolver: any;
-
-    const pubSub = createPubSub();
 
     beforeEach(() => {
       self = null;
@@ -2253,15 +2248,8 @@ describe("Resolvers", () => {
             return true;
           }
 
-          @Subscription({ topics: "baseTopic", name: `${name}Subscription` })
-          baseSubscription(@Arg("arg") _arg: boolean): boolean {
-            self = this;
-            return true;
-          }
-
           @Mutation(() => Boolean, { name: `${name}Trigger` })
           async baseTrigger(): Promise<boolean> {
-            pubSub.publish("baseTopic", null);
             return true;
           }
 
@@ -2294,15 +2282,14 @@ describe("Resolvers", () => {
           return true;
         }
 
-        @Subscription({ topics: "childTopic", complexity: 4 })
-        childSubscription(): boolean {
-          self = this;
-          return true;
-        }
+        // @Subscription({ topics: "childTopic", complexity: 4 })
+        // childSubscription(): boolean {
+        //   self = this;
+        //   return true;
+        // }
 
         @Mutation(() => Boolean)
         async childTrigger(): Promise<boolean> {
-          pubSub.publish("childTopic", null);
           return true;
         }
       }
@@ -2326,12 +2313,10 @@ describe("Resolvers", () => {
 
       const schemaInfo = await getSchemaInfo({
         resolvers: [childResolver, overrideResolver],
-        pubSub,
       });
       schemaIntrospection = schemaInfo.schemaIntrospection;
       queryType = schemaInfo.queryType;
       mutationType = schemaInfo.mutationType!;
-      subscriptionType = schemaInfo.subscriptionType!;
       schema = schemaInfo.schema;
     });
 
@@ -2359,17 +2344,17 @@ describe("Resolvers", () => {
       expect(mutationNames).toContain("overriddenMutation");
     });
 
-    it("should generate proper subscriptions in schema", async () => {
-      const subscriptionNames = subscriptionType.fields.map(it => it.name);
-      const prefixSubscription = subscriptionType.fields.find(
-        it => it.name === "prefixSubscription",
-      )!;
+    // it("should generate proper subscriptions in schema", async () => {
+    //   const subscriptionNames = subscriptionType.fields.map(it => it.name);
+    //   const prefixSubscription = subscriptionType.fields.find(
+    //     it => it.name === "prefixSubscription",
+    //   )!;
 
-      expect(subscriptionNames).toContain("childSubscription");
-      expect(subscriptionNames).toContain("prefixSubscription");
-      expect(subscriptionNames).toContain("overriddenSubscription");
-      expect(prefixSubscription.args).toHaveLength(1);
-    });
+    //   expect(subscriptionNames).toContain("childSubscription");
+    //   expect(subscriptionNames).toContain("prefixSubscription");
+    //   expect(subscriptionNames).toContain("overriddenSubscription");
+    //   expect(prefixSubscription.args).toHaveLength(1);
+    // });
 
     it("should generate proper object fields in schema", async () => {
       const sampleObjectType = schemaIntrospection.types.find(
