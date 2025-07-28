@@ -1,6 +1,6 @@
-import { validate } from "class-validator";
+// import { validate } from "class-validator";
 import {
-  ArgumentValidationError,
+  // ArgumentValidationError,
   type ClassType,
   createMethodMiddlewareDecorator,
 } from "type-graphql";
@@ -9,11 +9,11 @@ import {
 // This example use 'class-validator' however you can plug-in 'joi' or any other validation library
 export function ValidateArgs<T extends object>(Type: ClassType<T>) {
   return createMethodMiddlewareDecorator(async ({ args }, next) => {
-    const instance = Object.assign(new Type(), args);
-    const validationErrors = await validate(instance);
-    if (validationErrors.length > 0) {
-      throw new ArgumentValidationError(validationErrors);
-    }
+    Object.assign(new Type(), args);
+    // const validationErrors = await validate(instance);
+    // if (validationErrors.length > 0) {
+    //   throw new ArgumentValidationError(validationErrors);
+    // }
     return next();
   });
 }

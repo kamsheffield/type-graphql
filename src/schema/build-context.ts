@@ -1,6 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore 'class-validator' might not be installed by user
-import { type ValidatorOptions } from "class-validator";
 import { type GraphQLScalarType } from "graphql";
 import { type AuthChecker, type AuthMode } from "@/typings";
 import { type Middleware } from "@/typings/middleware";
@@ -13,7 +12,7 @@ export interface ScalarsTypeMap {
   scalar: GraphQLScalarType;
 }
 
-export type ValidateSettings = boolean | ValidatorOptions;
+export type ValidateSettings = boolean;
 
 export interface BuildContextOptions {
   scalarsMap?: ScalarsTypeMap[];

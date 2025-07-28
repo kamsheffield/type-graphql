@@ -1,4 +1,4 @@
-import { IsEmail } from "class-validator";
+// import { IsEmail } from "class-validator";
 import { Field, InputType, ObjectType } from "type-graphql";
 
 // 'UserDetails' stores base common user properties
@@ -14,7 +14,7 @@ export class UserDetails {
   @Field(_type => Date)
   dateOfBirth!: Date;
 
-  @IsEmail()
+  // @IsEmail()
   @Field()
   email!: string;
 }

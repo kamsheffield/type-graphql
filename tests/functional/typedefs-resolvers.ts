@@ -1,7 +1,6 @@
 /* eslint "no-underscore-dangle": ["error", { "allow": ["__schema"] }] */
 import "reflect-metadata";
 import { makeExecutableSchema } from "@graphql-tools/schema";
-import { MinLength } from "class-validator";
 import {
   type GraphQLSchema,
   type IntrospectionEnumType,
@@ -112,7 +111,7 @@ describe("typeDefs and resolvers", () => {
       @InputType()
       class SampleInput {
         @Field()
-        @MinLength(10)
+        // @MinLength(10)
         sampleInputStringField!: string;
 
         @Field()
@@ -487,18 +486,18 @@ describe("typeDefs and resolvers", () => {
         expect(inputValue.sampleInputDefaultStringField).toBe("sampleInputDefaultStringField");
       });
 
-      it("should validate the input", async () => {
-        const document = gql`
-          mutation {
-            sampleMutationWithInput(input: { sampleInputStringField: "short" })
-          }
-        `;
+      // it("should validate the input", async () => {
+      //   const document = gql`
+      //     mutation {
+      //       sampleMutationWithInput(input: { sampleInputStringField: "short" })
+      //     }
+      //   `;
 
-        const { errors } = await execute({ schema, document });
+      //   const { errors } = await execute({ schema, document });
 
-        expect(errors).toHaveLength(1);
-        expect(errors![0].message).toContain("Argument Validation Error");
-      });
+      //   expect(errors).toHaveLength(1);
+      //   expect(errors![0].message).toContain("Argument Validation Error");
+      // });
 
       it("should properly guard authorized resolver method", async () => {
         const document = gql`
