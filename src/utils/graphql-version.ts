@@ -1,5 +1,4 @@
-import * as graphql from "graphql";
-import semVer from "semver";
+import { version as gqlVersion, versionInfo as graphqlVersion } from "graphql";
 // Avoid '@/' due to 'scripts/version.ts'
 import { UnmetGraphQLPeerDependencyError } from "../errors";
 
@@ -7,7 +6,19 @@ import { UnmetGraphQLPeerDependencyError } from "../errors";
 export const graphQLPeerDependencyVersion = "^16.9.0";
 
 export function ensureInstalledCorrectGraphQLPackage() {
-  if (!semVer.satisfies(graphql.version, graphQLPeerDependencyVersion)) {
-    throw new UnmetGraphQLPeerDependencyError(graphql.version, graphQLPeerDependencyVersion);
+  if (graphqlVersion.major < 16) {
+    throw new UnmetGraphQLPeerDependencyError(gqlVersion, graphQLPeerDependencyVersion);
+  }
+  if (graphqlVersion.major > 16) {
+    return; // No need to check for minor/patch versions if major is correct
+  }
+  if (graphqlVersion.minor < 9) {
+    throw new UnmetGraphQLPeerDependencyError(gqlVersion, graphQLPeerDependencyVersion);
+  }
+  if (graphqlVersion.minor > 9) {
+    return; // No need to check for patch versions if minor is correct
+  }
+  if (graphqlVersion.patch < 0) {
+    throw new UnmetGraphQLPeerDependencyError(gqlVersion, graphQLPeerDependencyVersion);
   }
 }

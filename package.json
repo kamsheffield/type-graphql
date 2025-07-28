@@ -110,9 +110,7 @@
   "dependencies": {
     "@graphql-yoga/subscription": "^5.0.1",
     "@types/node": "*",
-    "@types/semver": "^7.5.8",
     "graphql-query-complexity": "^1.0.0",
-    "semver": "^7.6.3",
     "tslib": "^2.6.3"
   },
   "devDependencies": {
