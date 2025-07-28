@@ -5,10 +5,19 @@ declare global {
   var TypeGraphQLMetadataStorage: MetadataStorage;
 }
 
+function getGlobalVariable(): any {
+  if (typeof globalThis !== "undefined") {
+    return globalThis;
+  }
+  return global;
+}
+
 export function getMetadataStorage(): MetadataStorage {
-  if (!global.TypeGraphQLMetadataStorage) {
-    global.TypeGraphQLMetadataStorage = new MetadataStorage();
+  const globalVariable = getGlobalVariable();
+
+  if (!globalVariable.TypeGraphQLMetadataStorage) {
+    globalVariable.TypeGraphQLMetadataStorage = new MetadataStorage();
   }
 
-  return global.TypeGraphQLMetadataStorage;
+  return globalVariable.TypeGraphQLMetadataStorage;
 }

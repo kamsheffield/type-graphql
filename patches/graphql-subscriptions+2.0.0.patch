@@ -1,0 +1,14 @@
+diff --git a/node_modules/graphql-subscriptions/dist/pubsub.js b/node_modules/graphql-subscriptions/dist/pubsub.js
+index 37da9ff..039bc35 100644
+--- a/node_modules/graphql-subscriptions/dist/pubsub.js
++++ b/node_modules/graphql-subscriptions/dist/pubsub.js
+@@ -16,7 +16,8 @@ var __extends = (this && this.__extends) || (function () {
+ })();
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.PubSub = void 0;
+-var events_1 = require("events");
++import * as events_1 from 'node:events';
++//var events_1 = require("events");
+ var pubsub_engine_1 = require("./pubsub-engine");
+ var PubSub = (function (_super) {
+     __extends(PubSub, _super);

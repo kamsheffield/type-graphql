@@ -2,12 +2,8 @@ import path from "node:path";
 import { type GraphQLSchema } from "graphql";
 import { SchemaGenerator, type SchemaGeneratorOptions } from "@/schema/schema-generator";
 import { type NonEmptyArray } from "@/typings";
-import {
-  type PrintSchemaOptions,
-  defaultPrintSchemaOptions,
-  emitSchemaDefinitionFile,
-  emitSchemaDefinitionFileSync,
-} from "./emitSchemaDefinitionFile";
+import { emitSchemaDefinitionFile, emitSchemaDefinitionFileSync } from "./logSchemaDefinitionFile";
+import { type PrintSchemaOptions, defaultPrintSchemaOptions } from "./printSchemaOptions";
 
 type EmitSchemaFileOptions = {
   path?: string;

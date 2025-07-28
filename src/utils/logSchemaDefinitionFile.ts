@@ -1,5 +1,7 @@
+// same logic and signature as emitSchemaDefinitionFile
+// but only logs it to the console for Cloudflare Workers compatibility.
+
 import { type GraphQLSchema, lexicographicSortSchema, printSchema } from "graphql";
-import { outputFile, outputFileSync } from "@/helpers/filesystem";
 import { type PrintSchemaOptions, defaultPrintSchemaOptions } from "@/utils/printSchemaOptions";
 
 const generatedSchemaWarning = /* graphql */ `\
@@ -16,19 +18,19 @@ function getSchemaFileContent(schema: GraphQLSchema, options: PrintSchemaOptions
 }
 
 export function emitSchemaDefinitionFileSync(
-  schemaFilePath: string,
+  _schemaFilePath: string,
   schema: GraphQLSchema,
   options: PrintSchemaOptions = defaultPrintSchemaOptions,
 ) {
   const schemaFileContent = getSchemaFileContent(schema, options);
-  outputFileSync(schemaFilePath, schemaFileContent);
+  console.log(schemaFileContent);
 }
 
 export async function emitSchemaDefinitionFile(
-  schemaFilePath: string,
+  _schemaFilePath: string,
   schema: GraphQLSchema,
   options: PrintSchemaOptions = defaultPrintSchemaOptions,
 ) {
   const schemaFileContent = getSchemaFileContent(schema, options);
-  await outputFile(schemaFilePath, schemaFileContent);
+  console.log(schemaFileContent);
 }

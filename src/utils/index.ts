@@ -6,10 +6,7 @@ export {
 } from "./buildTypeDefsAndResolvers";
 export type { ContainerType, ContainerGetter } from "./container";
 export { createResolversMap } from "./createResolversMap";
-export type { PrintSchemaOptions } from "./emitSchemaDefinitionFile";
-export {
-  emitSchemaDefinitionFile,
-  emitSchemaDefinitionFileSync,
-  defaultPrintSchemaOptions,
-} from "./emitSchemaDefinitionFile";
+export type { PrintSchemaOptions } from "./printSchemaOptions";
+export { defaultPrintSchemaOptions } from "./printSchemaOptions";
+export { emitSchemaDefinitionFile, emitSchemaDefinitionFileSync } from "./logSchemaDefinitionFile";
 export * from "./graphql-version";
