@@ -35,20 +35,35 @@
   "author": "Michał Lytek (https://github.com/MichalLytek)",
   "exports": {
     ".": {
-      "require": "./build/cjs/index.js",
+      "types": "./build/typings/index.d.ts",
       "import": "./build/esm/index.js",
-      "types": "./build/typings/index.d.ts"
+      "require": "./build/cjs/index.js"
     },
     "./shim": {
-      "require": "./build/cjs/shim.js",
+      "types": "./build/typings/shim.ts",
       "import": "./build/esm/shim.js",
-      "types": "./build/typings/shim.ts"
+      "require": "./build/cjs/shim.js"
+    },
+    "./*": {
+      "types": "./build/typings/*.d.ts",
+      "import": "./build/esm/*.js",
+      "require": "./build/cjs/*.js"
     }
   },
   "main": "./build/cjs/index.js",
   "module": "./build/esm/index.js",
   "browser": "./build/cjs/shim.js",
   "types": "./build/typings/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "shim": [
+        "build/typings/shim.ts"
+      ],
+      "*": [
+        "build/typings/*"
+      ]
+    }
+  },
   "files": [
     "./build",
     "./patches",
