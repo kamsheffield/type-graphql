@@ -40,6 +40,7 @@ export function createHandlerResolver(
             resolverData,
             globalValidate,
             validateFn,
+            resolverMetadata,
           );
           if (isPromiseLike(params)) {
             return params.then(resolvedParams =>
@@ -58,6 +59,7 @@ export function createHandlerResolver(
         resolverData,
         globalValidate,
         validateFn,
+        resolverMetadata,
       );
       const targetInstance = targetInstanceOrPromise;
       if (isPromiseLike(params)) {
@@ -106,6 +108,7 @@ export function createAdvancedFieldResolver(
         resolverData,
         globalValidate,
         validateFn,
+        fieldResolverMetadata,
       );
       if (isPromiseLike(params)) {
         return params.then(resolvedParams =>

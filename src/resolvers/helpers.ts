@@ -1,6 +1,7 @@
+import "reflect-metadata";
 import { AuthMiddleware } from "@/helpers/auth-middleware";
 import { convertToType } from "@/helpers/types";
-import { type ParamMetadata } from "@/metadata/definitions";
+import { type BaseResolverMetadata, type ParamMetadata } from "@/metadata/definitions";
 import { type ValidateSettings } from "@/schema/build-context";
 import { type AuthChecker, type AuthMode, type ResolverData, type ValidatorFn } from "@/typings";
 import { type Middleware, type MiddlewareClass, type MiddlewareFn } from "@/typings/middleware";
@@ -14,6 +15,7 @@ export function getParams(
   resolverData: ResolverData<any>,
   globalValidate: ValidateSettings,
   globalValidateFn: ValidatorFn | undefined,
+  resolverMetadata?: BaseResolverMetadata,
 ): Promise<any[]> | any[] {
   const paramValues = params
     .sort((a, b) => a.index - b.index)
@@ -81,9 +83,33 @@ export function getParams(
       }
     });
 
-  // if the context has a request object pass that in as the last argument
-  if (resolverData.context?.request) {
-    paramValues.push(resolverData.context.request);
+  // resolve any @InjectRequestContext() decorated parameters
+  if (resolverData.context?.request && resolverMetadata) {
+    const requestContext = resolverData.context.request.context;
+
+    // whole context injection — write the RC into every registered index
+    const requestContextIndices: number[] | undefined = Reflect.getMetadata(
+      'base:requestContextIndex',
+      resolverMetadata.target.prototype,
+      resolverMetadata.methodName,
+    );
+    if (requestContextIndices) {
+      for (const index of requestContextIndices) {
+        paramValues[index] = requestContext;
+      }
+    }
+
+    // key-based extractions
+    const extractions: Map<number, { name: string }> | undefined = Reflect.getMetadata(
+      'base:requestContextExtractions',
+      resolverMetadata.target.prototype,
+      resolverMetadata.methodName,
+    );
+    if (extractions) {
+      for (const [index, key] of extractions) {
+        paramValues[index] = requestContext.get(key);
+      }
+    }
   }
   if (paramValues.some(isPromiseLike)) {
     return Promise.all(paramValues);
