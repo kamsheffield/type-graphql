@@ -17,71 +17,85 @@ export function getParams(
   globalValidateFn: ValidatorFn | undefined,
   resolverMetadata?: BaseResolverMetadata,
 ): Promise<any[]> | any[] {
-  const paramValues = params
-    .sort((a, b) => a.index - b.index)
-    // eslint-disable-next-line array-callback-return, consistent-return
-    .map(paramInfo => {
-      switch (paramInfo.kind) {
-        case "args":
-          return validateArg(
-            convertArgsToInstance(paramInfo, resolverData.args),
-            paramInfo.getType(),
-            resolverData,
-            globalValidate,
-            paramInfo.validateSettings,
-            globalValidateFn,
-            paramInfo.validateFn,
-          );
+  // Assign by each param's declared method-slot index, not by the order
+  // type-graphql registered them. `.map()` would produce a dense array
+  // of length `params.length` whose positions only coincidentally match
+  // method slots — so any later write at `paramValues[methodSlot]` (for
+  // `@InjectRequestContext`) could collide with a type-graphql value
+  // sitting at the same position when the indices don't line up.
+  const paramValues: any[] = [];
+  for (const paramInfo of params) {
+    let value: any;
+    switch (paramInfo.kind) {
+      case "args":
+        value = validateArg(
+          convertArgsToInstance(paramInfo, resolverData.args),
+          paramInfo.getType(),
+          resolverData,
+          globalValidate,
+          paramInfo.validateSettings,
+          globalValidateFn,
+          paramInfo.validateFn,
+        );
+        break;
 
-        case "arg":
-          return validateArg(
-            convertArgToInstance(paramInfo, resolverData.args),
-            paramInfo.getType(),
-            resolverData,
-            globalValidate,
-            paramInfo.validateSettings,
-            globalValidateFn,
-            paramInfo.validateFn,
-          );
+      case "arg":
+        value = validateArg(
+          convertArgToInstance(paramInfo, resolverData.args),
+          paramInfo.getType(),
+          resolverData,
+          globalValidate,
+          paramInfo.validateSettings,
+          globalValidateFn,
+          paramInfo.validateFn,
+        );
+        break;
 
-        case "context":
-          if (paramInfo.propertyName) {
-            return resolverData.context[paramInfo.propertyName];
-          }
-          return resolverData.context;
-
-        case "root": {
-          const rootValue = paramInfo.propertyName
-            ? resolverData.root[paramInfo.propertyName]
-            : resolverData.root;
-
-          if (!paramInfo.getType) {
-            return rootValue;
-          }
-          return convertToType(paramInfo.getType(), rootValue);
+      case "context":
+        if (paramInfo.propertyName) {
+          value = resolverData.context[paramInfo.propertyName];
+        } else {
+          value = resolverData.context;
         }
+        break;
 
-        case "info":
-          return resolverData.info;
-
-        case "custom":
-          if (paramInfo.options.arg) {
-            const arg = paramInfo.options.arg!;
-            return validateArg(
-              convertArgToInstance(arg, resolverData.args),
-              arg.getType(),
-              resolverData,
-              globalValidate,
-              arg.validateSettings,
-              globalValidateFn,
-              arg.validateFn,
-            ).then(() => paramInfo.resolver(resolverData));
-          }
-          return paramInfo.resolver(resolverData);
-
-        // no default
+      case "root": {
+        const rootValue = paramInfo.propertyName
+          ? resolverData.root[paramInfo.propertyName]
+          : resolverData.root;
+        if (!paramInfo.getType) {
+          value = rootValue;
+        } else {
+          value = convertToType(paramInfo.getType(), rootValue);
+        }
+        break;
       }
-    });
+
+      case "info":
+        value = resolverData.info;
+        break;
+
+      case "custom":
+        if (paramInfo.options.arg) {
+          const arg = paramInfo.options.arg!;
+          value = validateArg(
+            convertArgToInstance(arg, resolverData.args),
+            arg.getType(),
+            resolverData,
+            globalValidate,
+            arg.validateSettings,
+            globalValidateFn,
+            arg.validateFn,
+          ).then(() => paramInfo.resolver(resolverData));
+        } else {
+          value = paramInfo.resolver(resolverData);
+        }
+        break;
+
+      // no default
+    }
+    paramValues[paramInfo.index] = value;
+  }
 
   // resolve any @InjectRequestContext() decorated parameters
   if (resolverData.context?.request && resolverMetadata) {
@@ -111,6 +125,10 @@ export function getParams(
       }
     }
   }
+  // `some` on a sparse array skips holes; any remaining holes are method
+  // slots that neither type-graphql nor the RC decorators owned, and
+  // `.apply(this, paramValues)` will pass `undefined` for them, matching
+  // normal JS function-call semantics.
   if (paramValues.some(isPromiseLike)) {
     return Promise.all(paramValues);
   }
